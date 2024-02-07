@@ -1,0 +1,44 @@
+
+version: 1.0
+compose-app: docker compose
+env-file: .env
+defaults:
+  group: {{ env.KXGR_GROUP }}
+  project-name: sugar-{{ env.KXGR_PROJECT_NAME }}
+groups:
+  dev:
+    project-name: dev
+    compose-path: 
+      - tests/containers/compose.dev.yaml
+    env-file: .env
+    services:
+      default: django,prostgresql
+      available:
+        - name: django
+        - name: postgresql
+        - name: service1-3
+
+  staging:
+    project-name: staging
+    compose-path: 
+      - tests/containers/compose-staging.yaml
+    env-file: .env
+    services:
+      default: django,nginx,postgresql
+      available:
+        - name: django
+        - name: nginx
+        - name: postgresql
+
+  prod:
+    project-name: prod
+    compose-path:
+      - tests/containers/compose-prod.yaml
+    env-file: .env
+    services:
+      default: django,nginx,postgresql
+      available:
+        - name: django
+        - name: nginx
+        - name: postgresql
+        - name: memcache
