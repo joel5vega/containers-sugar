@@ -164,6 +164,29 @@ class SugarBase:
         self.service_group = deepcopy(self.config['groups']['main'])
         del self.config['services']
 
+
+    #added for f23 fucntion to recursive check
+    def get_extended_group_data(current_group_name, extended_group_name, group_chain=[]
+    ) -> dict[str, Any]:
+        print("=" * 80)
+        print(current_group_name, extended_group_name, group_chain)
+    
+        if extended_group_name in group_chain:
+            raise Exception(f"Circular reference for {group_chain}")
+
+        group_chain.append(extended_group_name)
+        data = GROUPS[extended_group_name]
+
+        new_extends_group = GROUPS[extended_group_name].get("extends")
+
+        print(f"new_extends_group({extended_group_name}):", new_extends_group)
+        
+        if new_extends_group:
+            base_data = get_extended_group_data(extended_group_name, new_extends_group, group_chain)
+            data.update(base_data)  
+
+        return data
+    
     def _filter_service_group(self):
         groups = self.config['groups']
 
@@ -184,6 +207,14 @@ class SugarBase:
 
         for group_name, group_data in groups.items():
             if group_name == selected_group_name:
+                  # Added for ft 23
+                if group_data.get('extends'):
+                    extended_group_name = group_data.get('extends')
+                    if extended_group_name:
+                        group_chain = [group_name].
+                        # execute a function
+                        base_group_data = get_extended_group_data(group_name,extended_group_name,group_chain)
+                        
                 if default_project_name and 'project-name' not in group_data:
                     # just use default value if "project-name" is not set
                     group_data['project-name'] = default_project_name
@@ -199,6 +230,9 @@ class SugarBase:
                     group_data['services']['default'] = ','.join(
                         default_services
                     )
+                
+              
+
                 self.service_group = group_data
                 return
 
